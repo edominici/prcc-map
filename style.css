@@ -1,16 +1,13 @@
-
-body {
-  font-family: Arial,Helvetica, sans-serif;
-  font-variant: small-caps;
-}
-
 h1{
     font-weight: bold;
+    font-family: Impact,Helvetica,sans-serif;
+    font-variant: small-caps;
+    letter-spacing: 1px;
 }
 
 #subtitle{
     font-weight:lighter;
-    font-size: large;
+    font-size: 70%
 }
 
 #zipsearch{
@@ -19,10 +16,6 @@ h1{
 
 #sidebar{
     background-color: #F7DC58;
-}
-
-.selectize-input > .option {
-    background-color: #F7DC58 !important;
 }
 
 #pagetitle { 
