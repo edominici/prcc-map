@@ -22,18 +22,25 @@ data(zipcode)
 ui <- fluidPage(
   tags$head(
     # Include our custom CSS
-    #includeCSS("style.css")
+    includeCSS("style.css")
   ),
   
   #title
-  titlePanel("PRCC Asset Map"),
+  titlePanel(
+    tags$div(id = "pagetitle",
+             tags$h1("PRCC",tags$span(id = "subtitle","Asset Map"))
+             )
+    
+  ),
   
   sidebarLayout(
-
-    #filters here
-    sidebarPanel(
-      selectInput('zip_list', 'Select Your Community','60201')
+      #filters here
+    sidebarPanel(id = 'sidebar',
+      tags$div(id='zipsearch',
+        selectInput('zip_list', 'SELECT YOUR COMMUNITY','60201')
+        )
     ),
+
 
     
     mainPanel(
