@@ -1,0 +1,33 @@
+
+body {
+  font-family: Arial,Helvetica, sans-serif;
+  font-variant: small-caps;
+}
+
+h1{
+    font-weight: bold;
+}
+
+#subtitle{
+    font-weight:lighter;
+    font-size: large;
+}
+
+#zipsearch{
+    color: #ff0077;
+}
+
+#sidebar{
+    background-color: #F7DC58;
+}
+
+.selectize-input > .option {
+    background-color: #F7DC58 !important;
+}
+
+#pagetitle { 
+    color:hsl(250,100%,25%);
+    font-weight: bold;
+    text-shadow: 2px 2px 3px lightgray;
+
+}
