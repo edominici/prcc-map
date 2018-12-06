@@ -32,12 +32,18 @@ h1{
 }
 
 ol{
-    padding: 5px;
-    margin-left: 5px;
+    padding: 2%;
+    margin-left: 6%;
     font-family: Tahoma;
     letter-spacing: 2px;
+    font-weight: bold;
 }
+
 
 li #zipsearch{
     color: #ff0077;
+}
+
+ol > li > * {
+  font-weight: normal;
 }
