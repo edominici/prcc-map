@@ -1,3 +1,9 @@
+body{
+    margin-left: 3%;
+    margin-right: 3%;
+}
+
+
 h1{
     font-weight: bold;
     font-family: Impact,Helvetica,sans-serif;
@@ -23,4 +29,15 @@ h1{
     font-weight: bold;
     text-shadow: 2px 2px 3px lightgray;
 
+}
+
+ol{
+    padding: 5px;
+    margin-left: 5px;
+    font-family: Tahoma;
+    letter-spacing: 2px;
+}
+
+li #zipsearch{
+    color: #ff0077;
 }
