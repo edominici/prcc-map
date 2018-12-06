@@ -33,7 +33,7 @@ zip_choices <- c(60007, 60018, 60068, 60106, 60131, 60176, 60601, 60602, 60603, 
 
 
 
-# Define UI for application that draws a histogram
+# Define UI for application
 ui <- fluidPage(
   tags$head(
     # Include our custom CSS
@@ -86,7 +86,7 @@ ui <- fluidPage(
     
     mainPanel(
       #map
-      leafletOutput('prccMap', height = 1000)
+      leafletOutput('prccMap', height = 700)
       #, tableOutput("results")
       
     )
@@ -115,32 +115,43 @@ server <- function(input, output,session) {
       
       leaflet() %>%
       addTiles()%>%
-      # setView(lat = 41.8781, lng = -87.6298, zoom = 12) %>%
-      addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
+      setView(lat = 41.8781, lng = -87.6298, zoom = 12) 
+      # addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
       #addResetMapButton() %>%
       #addSearchOSM(options = searchOptions(position = "topright"))
     prccMap
   })
   
+  filteredData <- reactive ({
+    mapData[mapData$`Services Offered` == input$servicesInput,]
+  })
   
+  # observeEvent(input$zipInput, {
+  #   if(input$zipInput == "Select zip code"){
+  #     proxy <-leafletProxy("prccMap", data = mapData)
+  #     proxy %>%
+  #       setView(lat = 41.8781, lng = -87.6298, zoom = 13)
+  # 
+  #   }else{
+  #     print(as.numeric(input$zipInput))
+  #     input_Zip = subset(zipcode, zip==as.numeric(input$zipInput),c("longitude", "latitude"))
+  #     print(input_Zip)
+  #     proxy <-leafletProxy("prccMap", data = mapData)
+  #     proxy %>%
+  #       setView(lat = as.numeric(input_Zip["latitude"]), lng =as.numeric(input_Zip["longitude"]), zoom = 15)
+  # 
+  #   }
+  # 
+  #   })
   
-  observeEvent(input$zipInput, {
-    if(input$zipInput == "Select zip code"){
-      proxy <-leafletProxy("prccMap", data = mapData)
-      proxy %>%
-        setView(lat = 41.8781, lng = -87.6298, zoom = 13)
-      
-    }else{
-      print(as.numeric(input$zipInput))
-      input_Zip = subset(zipcode, zip==as.numeric(input$zipInput),c("longitude", "latitude"))
-      print(input_Zip)
-      proxy <-leafletProxy("prccMap", data = mapData)
-      proxy %>%
-        setView(lat = as.numeric(input_Zip["latitude"]), lng =as.numeric(input_Zip["longitude"]), zoom = 15)
-      
-    }
+  observe({
+    proxy <- leafletProxy("prccMap", data = filteredData())
+    proxy %>%
+      clearMarkers() %>%
+      addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
+
     
-    })
+  })
   
 }
 
