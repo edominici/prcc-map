@@ -20,14 +20,13 @@ data(zipcode)
 
 spreadSheet <- gs_title("DominiciE_PRCC_Chicago2017")
 mapData <- as.data.frame(gs_read(ss=spreadSheet, ws = "Locations"))
-sepData2 <- separate_rows(mapData, "Payment Types", sep = ",")
-sepData1 <- separate_rows(sepData2, "Services Offered", sep = ",")
-sepData <- separate_rows(sepData1, "Populations Served", sep = ",")
+sepData1 <- separate_rows(mapData, "Payment Types", sep = ", ")
+sepData <- separate_rows(sepData1, "Services Offered", sep = ", ")
 head(sepData)
 
-service_choices <- unique(as.character(sepData$"Services Offered"))
-spanish_choices <- unique(as.character(sepData$"Spanish"))
-payment_choices <- unique(as.character(sepData$"Payment Types"))
+service_choices <- sort(unique(as.character(sepData$"Services Offered")))
+spanish_choices <- sort(unique(as.character(sepData$"Spanish")))
+payment_choices <- sort(unique(as.character(sepData$"Payment Types")))
 zip_choices <- c(60007, 60018, 60068, 60106, 60131, 60176, 60601, 60602, 60603, 60604, 60605, 60606, 60607, 60608, 60609, 60610, 60611, 60612, 60613, 60614, 60615, 60616, 60617, 60618, 60619, 60620, 60621, 60622, 60623, 60624, 60625, 60626, 60628, 60629, 60630, 60631, 60632, 60633, 60634, 60636, 60637, 60638, 60639, 60640, 60641, 60642, 60643, 60644, 60645, 60646, 60647, 60649, 60651, 60652, 60653, 60654, 60655, 60656, 60657, 60659, 60660, 60661, 60706, 60707, 60714, 60804, 60827)
 
 
@@ -67,14 +66,14 @@ ui <- fluidPage(
 
                  tags$li(
                    selectInput(
-                     'languagesInput', 'Language:', choices = c(service_choices[!is.na(spanish_choices)]), 
+                     'languagesInput', 'Language:', choices = c(spanish_choices[!is.na(spanish_choices)]), 
                      selectize = TRUE, multiple = TRUE
                    )
                  ),  
                  
                  tags$li(
                    selectInput(
-                     'paymentInput', 'Payment Options:', choices = c(service_choices[!is.na(payment_choices)]), 
+                     'paymentInput', 'Payment Options:', choices = c(payment_choices[!is.na(payment_choices)]), 
                      selectize = TRUE, multiple = TRUE
                    )
                  )
@@ -123,34 +122,38 @@ server <- function(input, output,session) {
   })
   
   filteredData <- reactive ({
-    mapData[mapData$`Services Offered` == input$servicesInput,]
+    
   })
   
-  # observeEvent(input$zipInput, {
-  #   if(input$zipInput == "Select zip code"){
-  #     proxy <-leafletProxy("prccMap", data = mapData)
-  #     proxy %>%
-  #       setView(lat = 41.8781, lng = -87.6298, zoom = 13)
-  # 
-  #   }else{
-  #     print(as.numeric(input$zipInput))
-  #     input_Zip = subset(zipcode, zip==as.numeric(input$zipInput),c("longitude", "latitude"))
-  #     print(input_Zip)
-  #     proxy <-leafletProxy("prccMap", data = mapData)
-  #     proxy %>%
-  #       setView(lat = as.numeric(input_Zip["latitude"]), lng =as.numeric(input_Zip["longitude"]), zoom = 15)
-  # 
-  #   }
-  # 
-  #   })
-  
-  observe({
-    proxy <- leafletProxy("prccMap", data = filteredData())
-    proxy %>%
-      clearMarkers() %>%
-      addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
+  observeEvent(input$zipInput, {
+    if(input$zipInput == "Select zip code"){
+      proxy <-leafletProxy("prccMap", data = mapData)
+      proxy %>%
+        setView(lat = 41.8781, lng = -87.6298, zoom = 13)
 
+    }else{
+      print(as.numeric(input$zipInput))
+      input_Zip = subset(zipcode, zip==as.numeric(input$zipInput),c("longitude", "latitude"))
+      print(input_Zip)
+      proxy <-leafletProxy("prccMap", data = mapData)
+      proxy %>%
+        setView(lat = as.numeric(input_Zip["latitude"]), lng =as.numeric(input_Zip["longitude"]), zoom = 15)
+
+    }
+
+    })
+  
+  observeEvent(input$servicesInput, {
     
+    patterns <- input$servicesInput
+    filteredData <- filter(mapData, grepl(paste(patterns, collapse="|"), mapData$"Services Offered"))
+    
+    print(patterns)
+    print(head(filteredData))
+    proxy <- leafletProxy("prccMap", data = filteredData)
+    proxy %>%
+     clearMarkers() %>%
+      addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
   })
   
 }
