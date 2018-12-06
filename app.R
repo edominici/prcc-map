@@ -47,29 +47,39 @@ ui <- fluidPage(
     )
     
   ),
-  
+  tags$hr(),
   sidebarLayout(
     #filters here
     sidebarPanel(id = 'sidebar',
-                 tags$div(id='zipsearch',
-                          selectInput(
-                            'zipInput', 'SELECT YOUR ZIPCODE', choices = c("Select zip code", zip_choices), selected = "Select zip code")
+      tags$ol(
+                 tags$li(id='zipsearch',
+                   tags$div(
+                            selectInput(
+                              'zipInput', 'SELECT YOUR ZIPCODE', choices = c("Select zip code", zip_choices), selected = "Select zip code")
+                   )
                  ),
-                 
-                 selectInput(
-                   'servicesInput', 'Services:', choices = c(service_choices[!is.na(service_choices)]),
-                   selectize = TRUE, multiple = TRUE
+                 tags$li(
+                   selectInput(
+                     'servicesInput', 'Services:', choices = c(service_choices[!is.na(service_choices)]),
+                     selectize = TRUE, multiple = TRUE
+                   )
                  ),
+
+                 tags$li(
+                   selectInput(
+                     'languagesInput', 'Language:', choices = c(service_choices[!is.na(spanish_choices)]), 
+                     selectize = TRUE, multiple = TRUE
+                   )
+                 ),  
                  
-                 selectInput(
-                   'languagesInput', 'Language:', choices = c(service_choices[!is.na(spanish_choices)]), 
-                   selectize = TRUE, multiple = TRUE
-                 ),
-                 
-                 selectInput(
-                   'paymentInput', 'Payment Options:', choices = c(service_choices[!is.na(payment_choices)]), 
-                   selectize = TRUE, multiple = TRUE
+                 tags$li(
+                   selectInput(
+                     'paymentInput', 'Payment Options:', choices = c(service_choices[!is.na(payment_choices)]), 
+                     selectize = TRUE, multiple = TRUE
+                   )
                  )
+      )
+                 
     ),
     
     
@@ -90,7 +100,7 @@ server <- function(input, output,session) {
   
   
   # get zipcodes from google sheet
-
+  
   
   
   
@@ -98,31 +108,39 @@ server <- function(input, output,session) {
   output$prccMap <- renderLeaflet({
     
     # get longitude and latitude of selected zipcode
-   
+    
     
     #Map
     prccMap <- mapData %>%
       
       leaflet() %>%
       addTiles()%>%
-     # setView(lat = 41.8781, lng = -87.6298, zoom = 12) %>%
-      addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())%>%
+      # setView(lat = 41.8781, lng = -87.6298, zoom = 12) %>%
+      addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
       #addResetMapButton() %>%
-      addSearchOSM(options = searchOptions(position = "topright"))
+      #addSearchOSM(options = searchOptions(position = "topright"))
     prccMap
   })
   
   
   
   observeEvent(input$zipInput, {
+    if(input$zipInput == "Select zip code"){
+      proxy <-leafletProxy("prccMap", data = mapData)
+      proxy %>%
+        setView(lat = 41.8781, lng = -87.6298, zoom = 13)
+      
+    }else{
+      print(as.numeric(input$zipInput))
+      input_Zip = subset(zipcode, zip==as.numeric(input$zipInput),c("longitude", "latitude"))
+      print(input_Zip)
+      proxy <-leafletProxy("prccMap", data = mapData)
+      proxy %>%
+        setView(lat = as.numeric(input_Zip["latitude"]), lng =as.numeric(input_Zip["longitude"]), zoom = 15)
+      
+    }
     
-    print(as.numeric(input$zipInput))
-    input_Zip = subset(zipcode, zip==as.numeric(input$zipInput),c("longitude", "latitude"))
-    print(input_Zip)
-    proxy <-leafletProxy("prccMap", data = mapData)
-    proxy %>%
-      setView(lat = as.numeric(input_Zip["latitude"]), lng =as.numeric(input_Zip["longitude"]), zoom = 15)
-  })
+    })
   
 }
 
