@@ -123,11 +123,28 @@ server <- function(input, output,session) {
     
   #})
   subsetServices <- reactive({
-    
-    print(input$servicesInput)
-    print(input$languagesInput)
 
-    mapData[mapData$"Services Offered"==input$servicesInput & mapData$"Spanish"==input$languagesInput & mapData$"Payment Types"==input$paymentInput,]
+    if(!is.null(input$servicesInput) & !is.null(input$languagesInput) & !is.null(input$paymentInput)){
+      mapData[mapData$"Services Offered"==input$servicesInput & mapData$"Spanish"==input$languagesInput & mapData$"Payment Types"==input$paymentInput,]
+    }else if (!is.null(input$servicesInput)& !is.null(input$languagesInput)){
+      mapData[mapData$"Services Offered"==input$servicesInput & mapData$"Spanish"==input$languagesInput,]
+      
+    }else if (!is.null(input$servicesInput) & !is.null(input$paymentInput)){
+      mapData[mapData$"Services Offered"==input$servicesInput & mapData$"Payment Types"==input$paymentInput,]
+      
+    }else if(!is.null(input$languagesInput) & !is.null(input$paymentInput)){
+      mapData[mapData$"Spanish"==input$languagesInput & mapData$"Payment Types"==input$paymentInput,]
+      
+    }else if(!is.null(input$servicesInput)){
+      mapData[mapData$"Services Offered"==input$servicesInput,]
+      
+    }else if(!is.null(input$languagesInput)){
+      mapData[mapData$"Spanish"==input$languagesInput,]
+      
+    }else{
+      mapData[mapData$"Payment Types"==input$paymentInput,]
+    }
+
 
   })
   
@@ -150,14 +167,13 @@ server <- function(input, output,session) {
     
   })
   
-  observeEvent(input$paymentInput, {
-
+  observe({
     proxy <- leafletProxy("prccMap", data = subsetServices())
     proxy %>%
-      clearMarkers() %>%
+      clearMarkerClusters()%>%
       addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
   })
-  
+
  
   
 }
