@@ -123,26 +123,22 @@ server <- function(input, output,session) {
     
   #})
   subsetServices <- reactive({
-
     if(!is.null(input$servicesInput) & !is.null(input$languagesInput) & !is.null(input$paymentInput)){
-      mapData[mapData$"Services Offered"==input$servicesInput & mapData$"Spanish"==input$languagesInput & mapData$"Payment Types"==input$paymentInput,]
+      mapData[grepl(paste(input$servicesInput, collapse="|"), mapData$"Services Offered") & grepl(paste(input$languagesInput, collapse="|"), mapData$"Spanish") & grepl(paste(input$paymentInput, collapse="|"), mapData$"Payment Types"),]
     }else if (!is.null(input$servicesInput)& !is.null(input$languagesInput)){
-      mapData[mapData$"Services Offered"==input$servicesInput & mapData$"Spanish"==input$languagesInput,]
-      
+      mapData[grepl(paste(input$servicesInput, collapse="|"), mapData$"Services Offered") & grepl(paste(input$languagesInput, collapse="|"), mapData$"Spanish"),]
     }else if (!is.null(input$servicesInput) & !is.null(input$paymentInput)){
-      mapData[mapData$"Services Offered"==input$servicesInput & mapData$"Payment Types"==input$paymentInput,]
-      
+      mapData[grepl(paste(input$servicesInput, collapse="|"), mapData$"Services Offered") & grepl(paste(input$paymentInput, collapse="|"), mapData$"Payment Types"),]
     }else if(!is.null(input$languagesInput) & !is.null(input$paymentInput)){
-      mapData[mapData$"Spanish"==input$languagesInput & mapData$"Payment Types"==input$paymentInput,]
-      
+      mapData[grepl(paste(input$languagesInput, collapse="|"), mapData$"Spanish") & grepl(paste(input$paymentInput, collapse="|"), mapData$"Payment Types"),]
     }else if(!is.null(input$servicesInput)){
-      mapData[mapData$"Services Offered"==input$servicesInput,]
-      
+      mapData[grepl(paste(input$servicesInput, collapse="|"), mapData$"Services Offered"),]
     }else if(!is.null(input$languagesInput)){
-      mapData[mapData$"Spanish"==input$languagesInput,]
-      
+      mapData[grepl(paste(input$languagesInput, collapse="|"), mapData$"Spanish"),]
+    }else if(!is.null(input$paymentInput)){
+      mapData[grepl(paste(input$paymentInput, collapse="|"), mapData$"Payment Types"),]
     }else{
-      mapData[mapData$"Payment Types"==input$paymentInput,]
+      mapData[FALSE,]
     }
 
 
