@@ -78,7 +78,6 @@ ui <- fluidPage(
                      )
                    )
                  )
-                 
     ),
     
     
@@ -89,9 +88,7 @@ ui <- fluidPage(
       #, tableOutput("results")
       
     )
-    
   )
-  
 )
 
 # Define server logic required to draw a histogram
@@ -119,10 +116,8 @@ server <- function(input, output,session) {
     prccMap
   })
   
-  #filteredData <- reactive ({
-    
-  #})
-  subsetServices <- reactive({
+
+  filteredData <- reactive({
     if(!is.null(input$servicesInput) & !is.null(input$languagesInput) & !is.null(input$paymentInput)){
       mapData[grepl(paste(input$servicesInput, collapse="|"), mapData$"Services Offered") & grepl(paste(input$languagesInput, collapse="|"), mapData$"Spanish") & grepl(paste(input$paymentInput, collapse="|"), mapData$"Payment Types"),]
     }else if (!is.null(input$servicesInput)& !is.null(input$languagesInput)){
@@ -140,8 +135,6 @@ server <- function(input, output,session) {
     }else{
       mapData[FALSE,]
     }
-
-
   })
   
   
@@ -149,7 +142,7 @@ server <- function(input, output,session) {
     if(input$zipInput == "Select zip code"){
       proxy <-leafletProxy("prccMap", data = mapData)
       proxy %>%
-        setView(lat = 41.8781, lng = -87.6298, zoom = 13)
+        setView(lat = 41.8781, lng = -87.6298, zoom = 12)
       
     }else{
       print(as.numeric(input$zipInput))
@@ -157,21 +150,17 @@ server <- function(input, output,session) {
       print(input_Zip)
       proxy <-leafletProxy("prccMap", data = mapData)
       proxy %>%
-        setView(lat = as.numeric(input_Zip["latitude"]), lng =as.numeric(input_Zip["longitude"]), zoom = 15)
-      
+        setView(lat = as.numeric(input_Zip["latitude"]), lng =as.numeric(input_Zip["longitude"]), zoom = 14)
     }
-    
   })
   
   observe({
-    proxy <- leafletProxy("prccMap", data = subsetServices())
+    proxy <- leafletProxy("prccMap", data = filteredData())
     proxy %>%
       clearMarkerClusters()%>%
       addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
   })
-
  
-  
 }
 
 # Run the application 

@@ -50,34 +50,34 @@ ui <- fluidPage(
   sidebarLayout(
     #filters here
     sidebarPanel(id = 'sidebar',
-      tags$ol(
-                 tags$li(id='zipsearch',
-                   tags$div(
-                            selectInput(
-                              'zipInput', 'SELECT YOUR ZIPCODE', choices = c("Select zip code", zip_choices), selected = "Select zip code")
-                   )
-                 ),
-                 tags$li(
-                   selectInput(
-                     'servicesInput', 'Services:', choices = c(service_choices[!is.na(service_choices)]),
-                     selectize = TRUE, multiple = TRUE
-                   )
-                 ),
-
-                 tags$li(
-                   selectInput(
-                     'languagesInput', 'Language:', choices = c(spanish_choices[!is.na(spanish_choices)]), 
-                     selectize = TRUE, multiple = TRUE
-                   )
-                 ),  
-                 
-                 tags$li(
-                   selectInput(
-                     'paymentInput', 'Payment Options:', choices = c(payment_choices[!is.na(payment_choices)]), 
-                     selectize = TRUE, multiple = TRUE
+                 tags$ol(
+                   tags$li(id='zipsearch',
+                           tags$div(
+                             selectInput(
+                               'zipInput', 'SELECT YOUR ZIPCODE', choices = c("Select zip code", zip_choices), selected = "Select zip code")
+                           )
+                   ),
+                   tags$li(
+                     selectInput(
+                       'servicesInput', 'Services:', choices = c(service_choices[!is.na(service_choices)]),
+                       selectize = TRUE, multiple = TRUE
+                     )
+                   ),
+                   
+                   tags$li(
+                     selectInput(
+                       'languagesInput', 'Language:', choices = c(spanish_choices[!is.na(spanish_choices)]), 
+                       selectize = TRUE, multiple = TRUE
+                     )
+                   ),  
+                   
+                   tags$li(
+                     selectInput(
+                       'paymentInput', 'Payment Options:', choices = c(payment_choices[!is.na(payment_choices)]), 
+                       selectize = TRUE, multiple = TRUE
+                     )
                    )
                  )
-      )
                  
     ),
     
@@ -95,7 +95,7 @@ ui <- fluidPage(
 )
 
 # Define server logic required to draw a histogram
-server <- function(input, output,session) {
+server <- function(input, output, session) {
   
   
   # get zipcodes from google sheet
@@ -115,25 +115,22 @@ server <- function(input, output,session) {
       leaflet() %>%
       addTiles()%>%
       setView(lat = 41.8781, lng = -87.6298, zoom = 12) 
-      # addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
-      #addResetMapButton() %>%
-      #addSearchOSM(options = searchOptions(position = "topright"))
+    # addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
+    #addResetMapButton() %>%
+    #addSearchOSM(options = searchOptions(position = "topright"))
     prccMap
   })
   
-  filteredData <- reactive ({
-    
-  })
   
   observeEvent(input$zipInput, {
     if(input$zipInput == "Select zip code"){
       proxy <-leafletProxy("prccMap", data = mapData)
       proxy %>%
-        setView(lat = 41.8781, lng = -87.6298, zoom = 13)
+        setView(lat = 41.8781, lng = -87.6298, zoom = 12)
 
     }else{
       print(as.numeric(input$zipInput))
-      input_Zip = subset(zipcode, zip==as.numeric(input$zipInput),c("longitude", "latitude"))
+      input_Zip = subset(zipcode, zip==as.numeric(input$zipInput), c("longitude", "latitude"))
       print(input_Zip)
       proxy <-leafletProxy("prccMap", data = mapData)
       proxy %>%
@@ -141,22 +138,55 @@ server <- function(input, output,session) {
 
     }
 
-    })
-  
-  observeEvent(input$servicesInput, {
-    
-    patterns <- input$servicesInput
-    filteredData <- filter(mapData, grepl(paste(patterns, collapse="|"), mapData$"Services Offered"))
-    
-    print(patterns)
-    print(head(filteredData))
-    proxy <- leafletProxy("prccMap", data = filteredData)
-    proxy %>%
-     clearMarkers() %>%
-      addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
   })
   
-}
+ # servicesFilter <- reactive({
+ #   filter(mapData, grepl(paste(input$servicesInput, collapse="|"), mapData$"Services Offered"))
+ # })
+  # 
+  observeEvent( input$servicesInput, {
+    #print(mapData)
+    services <- input$servicesInput
+    #print(input$servicesInput)
+    servicesSearchStr <- paste(services, collapse="|")
+    print(servicesSearchStr)
+    #print(grepl(servicesSearchStr, mapData[1]$"Services offered"))
+    
+    #filteredData <- filter(mapData, "Services Offered" == input$servicesInput[1] )
+    #filteredData <- filter(mapData, mapData$Name == "#2 Mount Pleasant MB Church")
+    print(mapData[mapData$"Services Offerred" == input$servicesInput[1],])
+    print(filteredData)
+    leafletProxy("prccMap", 
+                 data = filteredData %>%
+                  clearShapes() %>%
+                  addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip)) 
+                #clusterOptions = markerClusterOptions()
+                 )
+
+  })
+  # 
+  # languagesFilter <- reactive({
+  #   filter(mapData, grepl(paste(input$languagesInput, collapse="|"), mapData$"Services Offered"))
+  # })
+  # 
+  # paymentFilter <- reactive({
+  #   filter(mapData, grepl(paste(input$paymentInput, collapse="|"), mapData$"Services Offered"))
+  # })
+  
+#   observe({
+#     
+#     final_rows <-intersect(servicesFilter(), languagesFilter())
+#     final_rows <- intersect(final_rows, paymentFilter())
+#     
+#     filteredData <- mapData[final_rows]
+# 
+#     proxy <- leafletProxy("prccMap", data = filteredData)
+#     proxy %>%
+#       clearMarkers() %>%
+#       addMarkers(lat = ~Lat, lng = ~Lng, popup = ~paste("<strong><a href='", Website, "' target='_blank'>", Name, "</a></strong><br>", Street, "<br>", City, ", ", State, Zip), clusterOptions = markerClusterOptions())
+#   })
+#   
+ }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
